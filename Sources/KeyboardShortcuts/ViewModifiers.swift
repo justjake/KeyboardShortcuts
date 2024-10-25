@@ -1,6 +1,35 @@
 #if os(macOS)
 import SwiftUI
 
+extension NSEvent.ModifierFlags: Hashable {
+    
+}
+
+@available(macOS 11, *)
+public extension KeyboardShortcuts.Shortcut {
+    fileprivate static let modifierMap: [NSEvent.ModifierFlags:EventModifiers] = [
+        .capsLock: .capsLock,
+        .command: .command,
+        .control: .control,
+        .numericPad: .numericPad,
+        .option: .option,
+        .shift: .shift
+    ]
+    
+    @MainActor
+    var keyboardShortcut: KeyboardShortcut {
+        var eventModifiers: EventModifiers = []
+        for (nsEventModifier, swiftuiModifier) in Self.modifierMap {
+            if modifiers.contains(nsEventModifier) {
+                eventModifiers.insert(swiftuiModifier)
+            }
+        }
+        
+        let result = KeyboardShortcut(KeyEquivalent(keyEquivalent.first!), modifiers: eventModifiers)
+        return result
+    }
+}
+
 @available(macOS 12, *)
 extension View {
 	/**
